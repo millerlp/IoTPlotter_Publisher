@@ -1,23 +1,23 @@
 /**
- * @file EnviroDIYPublisher.h
+ * @file IoTPlotterPublisher.h
  * @copyright 2017-2022 Stroud Water Research Center
  * Part of the EnviroDIY ModularSensors library for Arduino
  * @author Sara Geleskie Damiano <sdamiano@stroudcenter.org>
  *
- * @brief Contains the EnviroDIYPublisher subclass of dataPublisher for
- * publishing data to the Monitor My Watershed/EnviroDIY data portal at
- * http://data.enviroDIY.org
+ * @brief Contains the IoTPlotterPublisher subclass of dataPublisher for
+ * publishing data to the IoTPlotter.com data portal at
+ * http://iotplotter.com
  */
 
 // Header Guards
-#ifndef SRC_PUBLISHERS_ENVIRODIYPUBLISHER_H_
-#define SRC_PUBLISHERS_ENVIRODIYPUBLISHER_H_
+#ifndef SRC_PUBLISHERS_IOTPLOTTERPUBLISHER_H_
+#define SRC_PUBLISHERS_IOTPLOTTERPUBLISHER_H_
 
 // Debugging Statement
-// #define MS_ENVIRODIYPUBLISHER_DEBUG
+#define MS_IOTPLOTTERPUBLISHER_DEBUG
 
-#ifdef MS_ENVIRODIYPUBLISHER_DEBUG
-#define MS_DEBUGGING_STD "EnviroDIYPublisher"
+#ifdef MS_IOTPLOTTERPUBLISHER_DEBUG
+#define MS_DEBUGGING_STD "IoTPlotterPublisher"
 #endif
 
 // Included Dependencies
@@ -27,24 +27,24 @@
 
 
 // ============================================================================
-//  Functions for the EnviroDIY data portal receivers.
+//  Functions for the IoTPlotter data portal receivers.
 // ============================================================================
 /**
- * @brief The EnviroDIYPublisher subclass of dataPublisher for publishing data
- * to the Monitor My Watershed/EnviroDIY data portal at
- * http://data.enviroDIY.org
+ * @brief The IoTPlotterPublisher subclass of dataPublisher for publishing data
+ * to the IoTPlotter data portal at
+ * http://iotplotter.com
  *
  * @ingroup the_publishers
  */
-class EnviroDIYPublisher : public dataPublisher {
+class IoTPlotterPublisher : public dataPublisher {
  public:
     // Constructors
     /**
-     * @brief Construct a new EnviroDIY Publisher object with no members set.
+     * @brief Construct a new IoTPlotter Publisher object with no members set.
      */
-    EnviroDIYPublisher();
+    IoTPlotterPublisher();
     /**
-     * @brief Construct a new EnviroDIY Publisher object
+     * @brief Construct a new IoTPlotter Publisher object
      *
      * @note If a client is never specified, the publisher will attempt to
      * create and use a client on a LoggerModem instance tied to the attached
@@ -63,7 +63,7 @@ class EnviroDIYPublisher : public dataPublisher {
      * issue, use the null constructor and a populated begin(...) within your
      * set-up function.
      */
-    explicit EnviroDIYPublisher(Logger& baseLogger, uint8_t sendEveryX = 1,
+    explicit IoTPlotterPublisher(Logger& baseLogger, uint8_t sendEveryX = 1,
                                 uint8_t sendOffset = 0);
     /**
      * @brief Construct a new EnviroDIY Publisher object
@@ -84,10 +84,10 @@ class EnviroDIYPublisher : public dataPublisher {
      * issue, use the null constructor and a populated begin(...) within your
      * set-up function.
      */
-    EnviroDIYPublisher(Logger& baseLogger, Client* inClient,
+    IoTPlotterPublisher(Logger& baseLogger, Client* inClient,
                        uint8_t sendEveryX = 1, uint8_t sendOffset = 0);
     /**
-     * @brief Construct a new EnviroDIY Publisher object
+     * @brief Construct a new IoTPlotter Publisher object
      *
      * @param baseLogger The logger supplying the data to be published
      * @param registrationToken The registration token for the site on the
@@ -100,11 +100,11 @@ class EnviroDIYPublisher : public dataPublisher {
      * enable publishing data at a time slightly delayed from when it is
      * collected
      */
-    EnviroDIYPublisher(Logger& baseLogger, const char* registrationToken,
+    IoTPlotterPublisher(Logger& baseLogger, const char* registrationToken,
                        const char* samplingFeatureUUID, uint8_t sendEveryX = 1,
                        uint8_t sendOffset = 0);
     /**
-     * @brief Construct a new EnviroDIY Publisher object
+     * @brief Construct a new IoTPlotter Publisher object
      *
      * @param baseLogger The logger supplying the data to be published
      * @param inClient An Arduino client instance to use to print data to.
@@ -120,14 +120,14 @@ class EnviroDIYPublisher : public dataPublisher {
      * enable publishing data at a time slightly delayed from when it is
      * collected
      */
-    EnviroDIYPublisher(Logger& baseLogger, Client* inClient,
+    IoTPlotterPublisher(Logger& baseLogger, Client* inClient,
                        const char* registrationToken,
                        const char* samplingFeatureUUID, uint8_t sendEveryX = 1,
                        uint8_t sendOffset = 0);
     /**
-     * @brief Destroy the EnviroDIY Publisher object
+     * @brief Destroy the IoTPlotter Publisher object
      */
-    virtual ~EnviroDIYPublisher();
+    virtual ~IoTPlotterPublisher();
 
     // Returns the data destination
     String getEndpoint(void) override {
@@ -167,12 +167,11 @@ class EnviroDIYPublisher : public dataPublisher {
     void printSensorDataJSON(Stream* stream);
 
     /**
-     * @brief This prints a fully structured post request for Monitor My
-     * Watershed/EnviroDIY to the specified stream.
+     * @brief This prints a fully structured post request for IoTPlotter to the specified stream.
      *
      * @param stream The Arduino stream to write out the request to.
      */
-    void printEnviroDIYRequest(Stream* stream);
+    void printIoTPlotterRequest(Stream* stream);
 
     // A way to begin with everything already set
     /**
@@ -242,4 +241,4 @@ class EnviroDIYPublisher : public dataPublisher {
     const char* _registrationToken = nullptr;
 };
 
-#endif  // SRC_PUBLISHERS_ENVIRODIYPUBLISHER_H_
+#endif  // SRC_PUBLISHERS_IOTPLOTTERPUBLISHER_H_

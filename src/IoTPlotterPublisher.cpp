@@ -1,43 +1,45 @@
 /**
- * @file EnviroDIYPublisher.cpp
+ * @file IoTPlotterPublisher.cpp
  * @copyright 2017-2022 Stroud Water Research Center
  * Part of the EnviroDIY ModularSensors library for Arduino
  * @author Sara Geleskie Damiano <sdamiano@stroudcenter.org>
  *
- * @brief Implements the EnviroDIYPublisher class.
+ * @brief Implements the IoTPlotterPublisher class.
  */
 
-#include "EnviroDIYPublisher.h"
+#include "IoTPlotterPublisher.h"
 
 
 // ============================================================================
-//  Functions for the EnviroDIY data portal receivers.
+//  Functions for the IoTPlotter data portal receivers.
 // ============================================================================
 
 // Constant values for post requests
+// Example taken from https://iotplotter.com/docs/
 // I want to refer to these more than once while ensuring there is only one copy
 // in memory
-const char* EnviroDIYPublisher::postEndpoint        = "/api/data-stream/";
-const char* EnviroDIYPublisher::enviroDIYHost       = "data.envirodiy.org";
-const int   EnviroDIYPublisher::enviroDIYPort       = 80;
-const char* EnviroDIYPublisher::tokenHeader         = "\r\nTOKEN: ";
-const char* EnviroDIYPublisher::contentLengthHeader = "\r\nContent-Length: ";
-const char* EnviroDIYPublisher::contentTypeHeader =
-    "\r\nContent-Type: application/json\r\n\r\n";
+const char* IoTPlotterPublisher::IoTPlotterHost       = "iotplotter.com";
+const char* IoTPlotterPublisher::postEndpoint        = "/api/v2/feed/";
+// const int   IoTPlotterPublisher::IoTPlotterPort       = 80;  // LPM: Not necessary on IoTPlotter
+const char* IoTPlotterPublisher::apiHeader         = "\r\napi-key: ";
+const char* IoTPlotterPublisher::contentTypeHeader =
+    "\r\nContent-Type: application/x-www-form-urlencoded\r\n\r\n";
+const char* IoTPlotterPublisher::contentLengthHeader = "\r\nContent-Length: ";
 
-const char* EnviroDIYPublisher::samplingFeatureTag = "{\"sampling_feature\":\"";
-const char* EnviroDIYPublisher::timestampTag       = "\",\"timestamp\":\"";
+
+const char* IoTPlotterPublisher::samplingFeatureTag = "{\"sampling_feature\":\"";
+const char* IoTPlotterPublisher::timestampTag       = "\",\"timestamp\":\"";
 
 
 // Constructors
-EnviroDIYPublisher::EnviroDIYPublisher() : dataPublisher() {}
-EnviroDIYPublisher::EnviroDIYPublisher(Logger& baseLogger, uint8_t sendEveryX,
+IoTPlotterPublisher::IoTPlotterPublisher() : dataPublisher() {}
+IoTPlotterPublisher::IoTPlotterPublisher(Logger& baseLogger, uint8_t sendEveryX,
                                        uint8_t sendOffset)
     : dataPublisher(baseLogger, sendEveryX, sendOffset) {}
-EnviroDIYPublisher::EnviroDIYPublisher(Logger& baseLogger, Client* inClient,
+IoTPlotterPublisher::IoTPlotterPublisher(Logger& baseLogger, Client* inClient,
                                        uint8_t sendEveryX, uint8_t sendOffset)
     : dataPublisher(baseLogger, inClient, sendEveryX, sendOffset) {}
-EnviroDIYPublisher::EnviroDIYPublisher(Logger&     baseLogger,
+IoTPlotterPublisher::IoTPlotterPublisher(Logger&     baseLogger,
                                        const char* registrationToken,
                                        const char* samplingFeatureUUID,
                                        uint8_t sendEveryX, uint8_t sendOffset)
@@ -45,7 +47,7 @@ EnviroDIYPublisher::EnviroDIYPublisher(Logger&     baseLogger,
     setToken(registrationToken);
     _baseLogger->setSamplingFeatureUUID(samplingFeatureUUID);
 }
-EnviroDIYPublisher::EnviroDIYPublisher(Logger& baseLogger, Client* inClient,
+IoTPlotterPublisher::IoTPlotterPublisher(Logger& baseLogger, Client* inClient,
                                        const char* registrationToken,
                                        const char* samplingFeatureUUID,
                                        uint8_t sendEveryX, uint8_t sendOffset)
@@ -54,16 +56,16 @@ EnviroDIYPublisher::EnviroDIYPublisher(Logger& baseLogger, Client* inClient,
     _baseLogger->setSamplingFeatureUUID(samplingFeatureUUID);
 }
 // Destructor
-EnviroDIYPublisher::~EnviroDIYPublisher() {}
+IoTPlotterPublisher::~IoTPlotterPublisher() {}
 
 
-void EnviroDIYPublisher::setToken(const char* registrationToken) {
+void IoTPlotterPublisher::setToken(const char* registrationToken) {
     _registrationToken = registrationToken;
 }
 
 
 // Calculates how long the JSON will be
-uint16_t EnviroDIYPublisher::calculateJsonSize() {
+uint16_t IoTPlotterPublisher::calculateJsonSize() {
     uint16_t jsonLength = 21;  // {"sampling_feature":"
     jsonLength += 36;          // sampling feature UUID
     jsonLength += 15;          // ","timestamp":"
@@ -84,7 +86,7 @@ uint16_t EnviroDIYPublisher::calculateJsonSize() {
 }
 
 // This prints a properly formatted JSON for EnviroDIY to an Arduino stream
-void EnviroDIYPublisher::printSensorDataJSON(Stream* stream) {
+void IoTPlotterPublisher::printSensorDataJSON(Stream* stream) {
     stream->print(samplingFeatureTag);
     stream->print(_baseLogger->getSamplingFeatureUUID());
     stream->print(timestampTag);
@@ -105,7 +107,7 @@ void EnviroDIYPublisher::printSensorDataJSON(Stream* stream) {
 
 // This prints a fully structured post request for EnviroDIY to the
 // specified stream.
-void EnviroDIYPublisher::printEnviroDIYRequest(Stream* stream) {
+void IoTPlotterPublisher::printEnviroDIYRequest(Stream* stream) {
     // Stream the HTTP headers for the post request
     stream->print(postHeader);
     stream->print(postEndpoint);
@@ -124,14 +126,14 @@ void EnviroDIYPublisher::printEnviroDIYRequest(Stream* stream) {
 
 
 // A way to begin with everything already set
-void EnviroDIYPublisher::begin(Logger& baseLogger, Client* inClient,
+void IoTPlotterPublisher::begin(Logger& baseLogger, Client* inClient,
                                const char* registrationToken,
                                const char* samplingFeatureUUID) {
     setToken(registrationToken);
     dataPublisher::begin(baseLogger, inClient);
     _baseLogger->setSamplingFeatureUUID(samplingFeatureUUID);
 }
-void EnviroDIYPublisher::begin(Logger&     baseLogger,
+void IoTPlotterPublisher::begin(Logger&     baseLogger,
                                const char* registrationToken,
                                const char* samplingFeatureUUID) {
     setToken(registrationToken);
@@ -144,8 +146,8 @@ void EnviroDIYPublisher::begin(Logger&     baseLogger,
 // EnviroDIY/ODM2DataSharingPortal and then streams out a post request
 // over that connection.
 // The return is the http status code of the response.
-// int16_t EnviroDIYPublisher::postDataEnviroDIY(void)
-int16_t EnviroDIYPublisher::publishData(Client* outClient) {
+// int16_t IoTPlotterPublisher::postDataEnviroDIY(void)
+int16_t IoTPlotterPublisher::publishData(Client* outClient) {
     // Create a buffer for the portions of the request and response
     char     tempBuffer[37] = "";
     uint16_t did_respond    = 0;
