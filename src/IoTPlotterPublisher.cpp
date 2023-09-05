@@ -108,14 +108,14 @@ void IoTPlotterPublisher::printSensorDataJSON(Stream* stream) {
 // TODO: Reformat for IoTPlotter
 // This prints a fully structured post request for IoTPlotter to the
 // specified stream.
-void IoTPlotterPublisher::printEnviroDIYRequest(Stream* stream) {
+void IoTPlotterPublisher::printIoTPlotterRequest(Stream* stream) {
     // Stream the HTTP headers for the post request
     stream->print(postHeader);
     stream->print(postEndpoint);
     stream->print(HTTPtag);
     stream->print(hostHeader);
-    stream->print(enviroDIYHost);
-    stream->print(tokenHeader);
+    stream->print(IoTPlotterHost);
+    stream->print(apiHeader);
     stream->print(_registrationToken);
     stream->print(contentLengthHeader);
     stream->print(calculateJsonSize());
@@ -155,10 +155,10 @@ int16_t IoTPlotterPublisher::publishData(Client* outClient) {
 
     MS_DBG(F("Outgoing JSON size:"), calculateJsonSize());
 
-    // Open a TCP/IP connection to the Enviro DIY Data Portal (WebSDL)
+    // Open a TCP/IP connection to the IoTPlotter Data Portal 
     MS_DBG(F("Connecting client"));
     MS_START_DEBUG_TIMER;
-    if (outClient->connect(IoTPlotterHost, enviroDIYPort)) {        // TODO: Deal with the port that isn't needed
+    if (outClient->connect(IoTPlotterHost, IoTPlotterPort)) {        // TODO: Deal with the port that isn't needed? Or just leave it at 80
         MS_DBG(F("Client connected after"), MS_PRINT_DEBUG_TIMER, F("ms\n"));
 
         // copy the initial post header into the tx buffer

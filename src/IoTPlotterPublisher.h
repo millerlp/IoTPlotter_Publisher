@@ -212,13 +212,13 @@ class IoTPlotterPublisher : public dataPublisher {
  protected:
     /**
      * @anchor envirodiy_post_vars
-     * @name Portions of the POST request to EnviroDIY
+     * @name Portions of the POST request to IoTPlotter.com
      *
      * @{
      */
     static const char* postEndpoint;   ///< The endpoint
     static const char* IoTPlotterHost;  ///< The host name
-    static const int   enviroDIYPort;  ///< The host port // LPM: Not needed? 
+    static const int   IoTPlotterPort;  ///< The host port // LPM: Not needed? 
     static const char* apiHeader;    ///< The token header text
     // static const char *cacheHeader;  ///< The cache header text
     // static const char *connectionHeader;  ///< The keep alive header text
@@ -228,7 +228,7 @@ class IoTPlotterPublisher : public dataPublisher {
 
     /**
      * @anchor envirodiy_json_vars
-     * @name Portions of the JSON object for EnviroDIY
+     * @name Portions of the JSON object for IoTPlotter.com
      *
      * @{
      */
