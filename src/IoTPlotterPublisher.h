@@ -63,8 +63,8 @@ class IoTPlotterPublisher : public dataPublisher {
      * issue, use the null constructor and a populated begin(...) within your
      * set-up function.
      */
-   //  explicit IoTPlotterPublisher(Logger& baseLogger, uint8_t sendEveryX = 1,
-   //                              uint8_t sendOffset = 0);
+    explicit IoTPlotterPublisher(Logger& baseLogger, uint8_t sendEveryX = 1,
+                                uint8_t sendOffset = 0);
     /**
      * @brief Construct a new EnviroDIY Publisher object
      *
@@ -84,14 +84,14 @@ class IoTPlotterPublisher : public dataPublisher {
      * issue, use the null constructor and a populated begin(...) within your
      * set-up function.
      */
-   //  IoTPlotterPublisher(Logger& baseLogger, Client* inClient,
-   //                     uint8_t sendEveryX = 1, uint8_t sendOffset = 0);
+    IoTPlotterPublisher(Logger& baseLogger, Client* inClient,
+                       uint8_t sendEveryX = 1, uint8_t sendOffset = 0);
     /**
      * @brief Construct a new IoTPlotter Publisher object
      *
      * @param baseLogger The logger supplying the data to be published
-     * @param feedID  The Feed ID provided by IoTPlotter.com
-     * @param apiKey  The API Key provided by IoTPlotter.com (keep this private)
+     * @param registrationToken The registration token for the site on the
+     * Monitor My Watershed data portal.
      * @param samplingFeatureUUID The sampling feature UUID for the site on the
      * Monitor My Watershed data portal.
      * @param sendEveryX Currently unimplemented, intended for future use to
@@ -100,15 +100,9 @@ class IoTPlotterPublisher : public dataPublisher {
      * enable publishing data at a time slightly delayed from when it is
      * collected
      */
-   //  IoTPlotterPublisher(Logger& baseLogger, const char* registrationToken,
-   //                     const char* samplingFeatureUUID, uint8_t sendEveryX = 1,
-   //                     uint8_t sendOffset = 0);
-    IoTPlotterPublisher(Logger& baseLogger, 
-                  const char* feedID,
-                  const char* apiKey,
-                  const char* samplingFeatureUUID, 
-                  uint8_t sendEveryX = 1,
-                  uint8_t sendOffset = 0);                       
+    IoTPlotterPublisher(Logger& baseLogger, const char* registrationToken,
+                       const char* samplingFeatureUUID, uint8_t sendEveryX = 1,
+                       uint8_t sendOffset = 0);
     /**
      * @brief Construct a new IoTPlotter Publisher object
      *
@@ -127,10 +121,8 @@ class IoTPlotterPublisher : public dataPublisher {
      * collected
      */
     IoTPlotterPublisher(Logger& baseLogger, Client* inClient,
-                       const char* feedID,
-                       const char* apiKey,
-                       const char* samplingFeatureUUID, 
-                       uint8_t sendEveryX = 1,
+                       const char* registrationToken,
+                       const char* samplingFeatureUUID, uint8_t sendEveryX = 1,
                        uint8_t sendOffset = 0);
     /**
      * @brief Destroy the IoTPlotter Publisher object
@@ -146,19 +138,10 @@ class IoTPlotterPublisher : public dataPublisher {
     /**
      * @brief Set the site registration token
      *
-     * @param FeedID The Feed ID for the site on the
-     * IoTPlotter data portal.
+     * @param registrationToken The registration token for the site on the
+     * Monitor My Watershed data portal.
      */
-    void setToken(const char* FeedID);
-
-    // Adds the API Key for the Feed
-    /**
-     * @brief Set the site API Key
-     *
-     * @param apiKey The API key for the site on the
-     * IoTPlotter data portal.
-     */
-    void setAPIkey(const char* apiKey);
+    void setToken(const char* registrationToken);
 
     /**
      * @brief Calculates how long the outgoing JSON will be
