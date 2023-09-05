@@ -90,18 +90,18 @@ class IoTPlotterPublisher : public dataPublisher {
      * @brief Construct a new IoTPlotter Publisher object
      *
      * @param baseLogger The logger supplying the data to be published
-     * @param registrationToken The registration token for the site on the
-     * Monitor My Watershed data portal.
-     * @param samplingFeatureUUID The sampling feature UUID for the site on the
-     * Monitor My Watershed data portal.
+     * @param apiKey The API Key for the site on the
+     * IoTPlotter.com data portal. Akin to the EnvironDIY registrationToken on MMW
+     * @param feedID The feed ID for the site on the
+     * IoTPlotter.com data portal. Akin to samplingFeatureUUID from MMW
      * @param sendEveryX Currently unimplemented, intended for future use to
      * enable caching and bulk publishing
      * @param sendOffset Currently unimplemented, intended for future use to
      * enable publishing data at a time slightly delayed from when it is
      * collected
      */
-    IoTPlotterPublisher(Logger& baseLogger, const char* registrationToken,
-                       const char* samplingFeatureUUID, uint8_t sendEveryX = 1,
+    IoTPlotterPublisher(Logger& baseLogger, const char* apiKey,
+                       const char* feedID, uint8_t sendEveryX = 1,
                        uint8_t sendOffset = 0);
     /**
      * @brief Construct a new IoTPlotter Publisher object
@@ -110,10 +110,10 @@ class IoTPlotterPublisher : public dataPublisher {
      * @param inClient An Arduino client instance to use to print data to.
      * Allows the use of any type of client and multiple clients tied to a
      * single TinyGSM modem instance
-     * @param registrationToken The registration token for the site on the
-     * Monitor My Watershed data portal.
-     * @param samplingFeatureUUID The sampling feature UUID for the site on the
-     * Monitor My Watershed data portal.
+     * @param apiKey The API Key for the site on the
+     * IoTPlotter.com data portal. Akin to the EnvironDIY registrationToken on MMW
+     * @param feedID The feed ID for the site on the
+     * IoTPlotter.com data portal. Akin to samplingFeatureUUID from MMW
      * @param sendEveryX Currently unimplemented, intended for future use to
      * enable caching and bulk publishing
      * @param sendOffset Currently unimplemented, intended for future use to
@@ -121,8 +121,8 @@ class IoTPlotterPublisher : public dataPublisher {
      * collected
      */
     IoTPlotterPublisher(Logger& baseLogger, Client* inClient,
-                       const char* registrationToken,
-                       const char* samplingFeatureUUID, uint8_t sendEveryX = 1,
+                       const char* apiKey,
+                       const char* feedID, uint8_t sendEveryX = 1,
                        uint8_t sendOffset = 0);
     /**
      * @brief Destroy the IoTPlotter Publisher object
@@ -134,14 +134,14 @@ class IoTPlotterPublisher : public dataPublisher {
         return String(enviroDIYHost);
     }
 
-    // Adds the site registration token
+    // Adds the site API Key 
     /**
-     * @brief Set the site registration token
+     * @brief Set the site API Key
      *
-     * @param registrationToken The registration token for the site on the
-     * Monitor My Watershed data portal.
+     * @param apiKey The API Key for the site on the
+     * IoTPlotter.com data portal. Akin to the EnvironDIY registrationToken on MMW
      */
-    void setToken(const char* registrationToken);
+    void setToken(const char* apiKey);
 
     /**
      * @brief Calculates how long the outgoing JSON will be
@@ -176,22 +176,22 @@ class IoTPlotterPublisher : public dataPublisher {
     // A way to begin with everything already set
     /**
      * @copydoc dataPublisher::begin(Logger& baseLogger, Client* inClient)
-     * @param registrationToken The registration token for the site on the
-     * Monitor My Watershed data portal.
-     * @param samplingFeatureUUID The sampling feature UUID for the site on the
-     * Monitor My Watershed data portal.
+     * @param apiKey The API Key for the site on the
+     * IoTPlotter.com data portal. Akin to the EnvironDIY registrationToken on MMW
+     * @param feedID The feed ID for the site on the
+     * IoTPlotter.com data portal. Akin to samplingFeatureUUID from MMW
      */
     void begin(Logger& baseLogger, Client* inClient,
-               const char* registrationToken, const char* samplingFeatureUUID);
+               const char* apiKey, const char* feedID);
     /**
      * @copydoc dataPublisher::begin(Logger& baseLogger)
-     * @param registrationToken The registration token for the site on the
-     * Monitor My Watershed data portal.
-     * @param samplingFeatureUUID The sampling feature UUID for the site on the
-     * Monitor My Watershed data portal.
+     * @param apiKey The API Key for the site on the
+     * IoTPlotter.com data portal. Akin to the EnvironDIY registrationToken on MMW
+     * @param feedID The feed ID for the site on the
+     * IoTPlotter.com data portal. Akin to samplingFeatureUUID from MMW
      */
-    void begin(Logger& baseLogger, const char* registrationToken,
-               const char* samplingFeatureUUID);
+    void begin(Logger& baseLogger, const char* apiKey,
+               const char* feedID);
 
     // int16_t postDataEnviroDIY(void);
     /**
@@ -217,9 +217,9 @@ class IoTPlotterPublisher : public dataPublisher {
      * @{
      */
     static const char* postEndpoint;   ///< The endpoint
-    static const char* enviroDIYHost;  ///< The host name
-    static const int   enviroDIYPort;  ///< The host port
-    static const char* tokenHeader;    ///< The token header text
+    static const char* IoTPlotterHost;  ///< The host name
+   //  static const int   enviroDIYPort;  ///< The host port // LPM: Not needed? 
+    static const char* apiHeader;    ///< The token header text
     // static const char *cacheHeader;  ///< The cache header text
     // static const char *connectionHeader;  ///< The keep alive header text
     static const char* contentLengthHeader;  ///< The content length header text
@@ -238,7 +238,7 @@ class IoTPlotterPublisher : public dataPublisher {
 
  private:
     // Tokens and UUID's for EnviroDIY
-    const char* _registrationToken = nullptr;
+    const char* _registrationToken = nullptr;         // LPM: change private variable name? 
 };
 
 #endif  // SRC_PUBLISHERS_IOTPLOTTERPUBLISHER_H_
