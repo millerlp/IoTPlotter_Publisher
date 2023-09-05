@@ -66,7 +66,7 @@ class IoTPlotterPublisher : public dataPublisher {
     explicit IoTPlotterPublisher(Logger& baseLogger, uint8_t sendEveryX = 1,
                                 uint8_t sendOffset = 0);
     /**
-     * @brief Construct a new EnviroDIY Publisher object
+     * @brief Construct a new IoTPlotter Publisher object
      *
      * @param baseLogger The logger supplying the data to be published
      * @param inClient An Arduino client instance to use to print data to.
@@ -218,7 +218,7 @@ class IoTPlotterPublisher : public dataPublisher {
      */
     static const char* postEndpoint;   ///< The endpoint
     static const char* IoTPlotterHost;  ///< The host name
-   //  static const int   enviroDIYPort;  ///< The host port // LPM: Not needed? 
+    static const int   enviroDIYPort;  ///< The host port // LPM: Not needed? 
     static const char* apiHeader;    ///< The token header text
     // static const char *cacheHeader;  ///< The cache header text
     // static const char *connectionHeader;  ///< The keep alive header text
