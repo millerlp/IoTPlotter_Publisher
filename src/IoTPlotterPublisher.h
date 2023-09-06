@@ -131,7 +131,7 @@ class IoTPlotterPublisher : public dataPublisher {
 
     // Returns the data destination
     String getEndpoint(void) override {
-        return String(enviroDIYHost);
+        return String(IoTPlotterHost);
     }
 
     // Adds the site API Key 
@@ -142,6 +142,15 @@ class IoTPlotterPublisher : public dataPublisher {
      * IoTPlotter.com data portal. Akin to the EnvironDIY registrationToken on MMW
      */
     void setToken(const char* apiKey);
+
+    // Adds the Feed ID 
+    /**
+     * @brief Set the IoTPlotter.com Feed ID
+     *
+     * @param feedID The Feed ID for the site on the
+     * IoTPlotter.com data portal. Akin to the EnviroDIY samplingFeatureUUID on MMW
+     */
+    void setFeedID(const char* feedID);
 
     /**
      * @brief Calculates how long the outgoing JSON will be
@@ -238,7 +247,8 @@ class IoTPlotterPublisher : public dataPublisher {
 
  private:
     // Tokens and UUID's for EnviroDIY
-    const char* _registrationToken = nullptr;         // LPM: change private variable name? 
+    const char* _registrationToken = nullptr;         
+    const char* _feedID = nullptr;         
 };
 
 #endif  // SRC_PUBLISHERS_IOTPLOTTERPUBLISHER_H_

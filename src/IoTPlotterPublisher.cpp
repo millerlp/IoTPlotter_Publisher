@@ -23,7 +23,7 @@ const char* IoTPlotterPublisher::postEndpoint        = "/api/v2/feed/";
 const int   IoTPlotterPublisher::IoTPlotterPort       = 80;  // LPM: Not necessary on IoTPlotter
 const char* IoTPlotterPublisher::apiHeader         = "\r\napi-key: ";  // LPM: was TokenHeader
 const char* IoTPlotterPublisher::contentTypeHeader =
-    "\r\nContent-Type: application/x-www-form-urlencoded\r\n\r\n";
+    "\r\nContent-Type: application/x-www-form-urlencoded";
 const char* IoTPlotterPublisher::contentLengthHeader = "\r\nContent-Length: ";
 
 
@@ -45,6 +45,7 @@ IoTPlotterPublisher::IoTPlotterPublisher(Logger&     baseLogger,
                                        uint8_t sendEveryX, uint8_t sendOffset)
     : dataPublisher(baseLogger, sendEveryX, sendOffset) {
     setToken(apiKey);   // was registrationToken
+    setFeedID(feedID);  
     _baseLogger->setSamplingFeatureUUID(feedID);       // was samplingFeatureUUID
 }
 IoTPlotterPublisher::IoTPlotterPublisher(Logger& baseLogger, Client* inClient,
@@ -53,6 +54,7 @@ IoTPlotterPublisher::IoTPlotterPublisher(Logger& baseLogger, Client* inClient,
                                        uint8_t sendEveryX, uint8_t sendOffset)
     : dataPublisher(baseLogger, inClient, sendEveryX, sendOffset) {
     setToken(apiKey);   // was registrationToken
+    setFeedID(feedID);  
     _baseLogger->setSamplingFeatureUUID(feedID);       // was samplingFeatureUUID
 }
 // Destructor
@@ -61,6 +63,10 @@ IoTPlotterPublisher::~IoTPlotterPublisher() {}
 
 void IoTPlotterPublisher::setToken(const char* apiKey) {
     _registrationToken = apiKey;        // was registrationToken
+}
+
+void IoTPlotterPublisher::setFeedID(const char* feedID) {
+    _feedID = feedID;        // 
 }
 
 // TODO: Recalculate length for IoTPlotter feed instead
@@ -110,16 +116,22 @@ void IoTPlotterPublisher::printSensorDataJSON(Stream* stream) {
 // specified stream.
 void IoTPlotterPublisher::printIoTPlotterRequest(Stream* stream) {
     // Stream the HTTP headers for the post request
-    stream->print(postHeader);
-    stream->print(postEndpoint);
-    stream->print(HTTPtag);
-    stream->print(hostHeader);
-    stream->print(IoTPlotterHost);
-    stream->print(apiHeader);
-    stream->print(_registrationToken);
-    stream->print(contentLengthHeader);
-    stream->print(calculateJsonSize());
-    stream->print(contentTypeHeader);
+    stream->print(postHeader);          // POST  - found in dataPublisherBase.cpp
+    stream->print("http://");           // http://                                        
+    stream->print(IoTPlotterHost);      // iotplotter.com
+    stream->print(postEndpoint);        // /api/v2/feed/
+    stream->print(_feedID);             // your feed ID inserted into the http url
+    stream->print(HTTPtag);             // HTTP/1.1
+    stream->print("\r\nConnection: Close"); // Connection: Close
+    stream->print(apiHeader);           // api-key:
+    stream->print(_registrationToken);  // the actual API key for your feed
+    stream->print(contentTypeHeader);   // "\r\nContent-Type: application/x-www-form-urlencoded"
+    stream->print(contentLengthHeader); // "\r\nContent-Length: "
+    stream->print(calculateJsonSize()); // Hopefully the correct size of the JSON payload
+    stream->print(hostHeader);          // "\r\nHost: "  in dataPublisherBase.cpp
+    stream->print(IoTPlotterHost);      // iotplotter.com
+    stream->print("\r\n\r\n"); 
+
 
     // Stream the JSON itself
     printSensorDataJSON(stream);
@@ -131,6 +143,7 @@ void IoTPlotterPublisher::begin(Logger& baseLogger, Client* inClient,
                                const char* apiKey,          // was registrationToken
                                const char* feedID) {        // was samplingFeatureUUID
     setToken(apiKey);                                       // was registrationToken
+    setFeedID(feedID);
     dataPublisher::begin(baseLogger, inClient);
     _baseLogger->setSamplingFeatureUUID(feedID);            // was samplingFeatureUUID
 }
@@ -138,6 +151,7 @@ void IoTPlotterPublisher::begin(Logger&     baseLogger,
                                const char* apiKey,          // was registrationToken
                                const char* feedID) {        // was samplingFeatureUUID
     setToken(apiKey);                                       // was registrationToken
+    setFeedID(feedID);
     dataPublisher::begin(baseLogger);
     _baseLogger->setSamplingFeatureUUID(feedID);            // was samplingFeatureUUID
 }
