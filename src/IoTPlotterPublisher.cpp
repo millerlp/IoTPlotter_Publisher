@@ -27,7 +27,7 @@ const char* IoTPlotterPublisher::contentTypeHeader =
 const char* IoTPlotterPublisher::contentLengthHeader = "\r\nContent-Length: ";
 
 
-const char* IoTPlotterPublisher::samplingFeatureTag = "{\"sampling_feature\":\"";  // LPM check this
+const char* IoTPlotterPublisher::samplingFeatureTag = "{\"data\":{\"";  // start of the JSON package
 const char* IoTPlotterPublisher::timestampTag       = "\",\"timestamp\":\"";        // LPM check this
 
 
@@ -178,41 +178,63 @@ int16_t IoTPlotterPublisher::publishData(Client* outClient) {
         // copy the initial post header into the tx buffer
         snprintf(txBuffer, sizeof(txBuffer), "%s", postHeader);
         snprintf(txBuffer + strlen(txBuffer),
+                 sizeof(txBuffer) - strlen(txBuffer), "%s", "http://");
+        snprintf(txBuffer + strlen(txBuffer),
+                 sizeof(txBuffer) - strlen(txBuffer), "%s", IoTPlotterHost);
+        snprintf(txBuffer + strlen(txBuffer),
                  sizeof(txBuffer) - strlen(txBuffer), "%s", postEndpoint);
+        snprintf(txBuffer + strlen(txBuffer),
+                 sizeof(txBuffer) - strlen(txBuffer), "%s", _feedID);                 
         snprintf(txBuffer + strlen(txBuffer),
                  sizeof(txBuffer) - strlen(txBuffer), "%s", HTTPtag);
 
         // add the rest of the HTTP POST headers to the outgoing buffer
-        // before adding each line/chunk to the outgoing buffer, we make sure
-        // there is space for that line, sending out buffer if not
+        // Before adding each line/chunk to the outgoing buffer, we make sure
+        // there is space for that line, sending out buffer if not. This shouldn't
+        // really be an issue with the default buffer size of 750 char
         if (bufferFree() < 28) printTxBuffer(outClient);
         snprintf(txBuffer + strlen(txBuffer),
-                 sizeof(txBuffer) - strlen(txBuffer), "%s", hostHeader);
-        snprintf(txBuffer + strlen(txBuffer),
-                 sizeof(txBuffer) - strlen(txBuffer), "%s", IoTPlotterHost);
+                 sizeof(txBuffer) - strlen(txBuffer), "%s", "\r\nConnection: Close");
 
-        if (bufferFree() < 47) printTxBuffer(outClient);
+        // Add on the API key header line
+        if (bufferFree() < 55) printTxBuffer(outClient);
         snprintf(txBuffer + strlen(txBuffer),
-                 sizeof(txBuffer) - strlen(txBuffer), "%s", apiHeader); // was TokenHeader
+                 sizeof(txBuffer) - strlen(txBuffer), "%s", apiHeader);  // API key
         snprintf(txBuffer + strlen(txBuffer),
                  sizeof(txBuffer) - strlen(txBuffer), "%s", _registrationToken);
 
-        if (bufferFree() < 26) printTxBuffer(outClient);
+        // Add on the content type header line
+        if (bufferFree() < 55) printTxBuffer(outClient);
+        snprintf(txBuffer + strlen(txBuffer),
+                 sizeof(txBuffer) - strlen(txBuffer), "%s", contentTypeHeader);  // content type
+
+        // Add on the content length header line
+        if (bufferFree() < 25) printTxBuffer(outClient);
         snprintf(txBuffer + strlen(txBuffer),
                  sizeof(txBuffer) - strlen(txBuffer), "%s",
                  contentLengthHeader);
         itoa(calculateJsonSize(), tempBuffer, 10);  // BASE 10
         snprintf(txBuffer + strlen(txBuffer),
                  sizeof(txBuffer) - strlen(txBuffer), "%s", tempBuffer);
-
-        if (bufferFree() < 42) printTxBuffer(outClient);
+        
+        // Add on the Host header line
+        if (bufferFree() < 25) printTxBuffer(outClient);
         snprintf(txBuffer + strlen(txBuffer),
-                 sizeof(txBuffer) - strlen(txBuffer), "%s", contentTypeHeader);
+                 sizeof(txBuffer) - strlen(txBuffer), "%s", hostHeader);  // Host header
+        snprintf(txBuffer + strlen(txBuffer),
+                 sizeof(txBuffer) - strlen(txBuffer), "%s", IoTPlotterHost);  // Host name 
+        snprintf(txBuffer + strlen(txBuffer),
+                 sizeof(txBuffer) - strlen(txBuffer), "%s", "\r\n");  // newline before JSON package
 
         // put the start of the JSON into the outgoing response_buffer
         if (bufferFree() < 21) printTxBuffer(outClient);
         snprintf(txBuffer + strlen(txBuffer),
                  sizeof(txBuffer) - strlen(txBuffer), "%s", samplingFeatureTag);
+
+            // TODO (LPM): For each variable that gets its own graph, you'll need to 
+            // start with a \"GRAPH_NAME\":[{ prefix where GRAPH_NAME is the title of your graph
+            // \"HALL0\":[{\"value\":xx.xx,\"epoch\":xxxxxxxxxx}]
+            // Figure out how to pull that variable name to use as the name of the graph? 
 
         if (bufferFree() < 36) printTxBuffer(outClient);
         snprintf(txBuffer + strlen(txBuffer),
