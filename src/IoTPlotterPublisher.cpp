@@ -258,8 +258,8 @@ int16_t IoTPlotterPublisher::publishData(Client* outClient) {
             // Insert the text that comes after a value and before reporting the epoch timestamp                     
             snprintf(txBuffer + strlen(txBuffer),
                  sizeof(txBuffer) - strlen(txBuffer), "%s", epochTag);
-            // Get the epoch timestamp and convert to character array to put into tempBuffer
-            itoa(Logger::markedLocalEpochTime, tempBuffer, 10);  // BASE 10
+            // Get the unsigned long integer epoch timestamp and convert to ASCII character array to put into tempBuffer
+            ultoa(Logger::markedLocalEpochTime, tempBuffer, 10);  // BASE 10
             // Print the contents of tempBuffer (the epoch timestamp)
             snprintf(txBuffer + strlen(txBuffer),
                      sizeof(txBuffer) - strlen(txBuffer), "%s", tempBuffer);
