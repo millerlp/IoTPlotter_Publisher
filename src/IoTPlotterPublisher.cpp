@@ -28,7 +28,7 @@ const char* IoTPlotterPublisher::contentLengthHeader = "\r\nContent-Length: ";
 
 
 const char* IoTPlotterPublisher::samplingFeatureTag = "{\"data\":{\"";  // start of the JSON package
-const char* IoTPlotterPublisher::JSONvalueTag = ":[{\"value\":";
+const char* IoTPlotterPublisher::JSONvalueTag = "\":[{\"value\":";
 const char* IoTPlotterPublisher::epochTag       = ", \"epoch\":";        // LPM check this
 
 
@@ -99,12 +99,12 @@ uint16_t IoTPlotterPublisher::calculateJsonSize() {
 
 // This prints a properly formatted JSON for IoTPlotter to an Arduino stream
 void IoTPlotterPublisher::printSensorDataJSON(Stream* stream) {
-    stream->print("{\"data\":{\"");     // {"data":{"
+    stream->print(samplingFeatureTag);     // {"data":{"
     for (uint8_t i = 0; i < _baseLogger->getArrayVarCount(); i++) {
         stream->print(_baseLogger->getVarCodeAtI(i));  // VarCode, used as GRAPH_NAME
-        stream->print(":[{\"value\":");     // ":[{"value":
+        stream->print(JSONvalueTag);     // ":[{"value":
         stream->print(_baseLogger->getValueStringAtI(i));       // print the actual value
-        stream->print(", \"epoch\":");      // , "epoch":
+        stream->print(epochTag);      // , "epoch":
         stream->print(Logger::markedLocalEpochTime); // print time  options: Logger::markedLocalEpochTime or Logger::markedUTCEpochTime 
         stream->print("}]");
 
