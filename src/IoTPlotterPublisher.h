@@ -242,7 +242,8 @@ class IoTPlotterPublisher : public dataPublisher {
      * @{
      */
     static const char* samplingFeatureTag;  ///< The JSON feature UUID tag
-    static const char* timestampTag;        ///< The JSON feature timestamp tag
+    static const char* JSONvalueTag;         //  ":[{\"value\":"     used at start of reporting a value
+    static const char* epochTag;             //  ", \"epoch\":"  The JSON feature epoch timestamp tag
                                             /**@}*/
 
  private:

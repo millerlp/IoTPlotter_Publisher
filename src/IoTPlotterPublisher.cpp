@@ -28,7 +28,8 @@ const char* IoTPlotterPublisher::contentLengthHeader = "\r\nContent-Length: ";
 
 
 const char* IoTPlotterPublisher::samplingFeatureTag = "{\"data\":{\"";  // start of the JSON package
-const char* IoTPlotterPublisher::timestampTag       = "\",\"timestamp\":\"";        // LPM check this
+const char* IoTPlotterPublisher::JSONvalueTag = ":[{\"value\":";
+const char* IoTPlotterPublisher::epochTag       = ", \"epoch\":";        // LPM check this
 
 
 // Constructors
@@ -116,9 +117,6 @@ void IoTPlotterPublisher::printSensorDataJSON(Stream* stream) {
 }
 
 
-
-
-// TODO: Reformat for IoTPlotter
 // This prints a fully structured post request for IoTPlotter to the
 // specified stream.
 void IoTPlotterPublisher::printIoTPlotterRequest(Stream* stream) {
@@ -138,7 +136,6 @@ void IoTPlotterPublisher::printIoTPlotterRequest(Stream* stream) {
     stream->print(hostHeader);          // "\r\nHost: "  in dataPublisherBase.cpp
     stream->print(IoTPlotterHost);      // iotplotter.com
     stream->print("\r\n\r\n"); 
-
 
     // Stream the JSON itself
     printSensorDataJSON(stream);
@@ -236,44 +233,45 @@ int16_t IoTPlotterPublisher::publishData(Client* outClient) {
         // put the start of the JSON into the outgoing response_buffer
         if (bufferFree() < 21) printTxBuffer(outClient);
         snprintf(txBuffer + strlen(txBuffer),
-                 sizeof(txBuffer) - strlen(txBuffer), "%s", samplingFeatureTag);
+                 sizeof(txBuffer) - strlen(txBuffer), "%s", samplingFeatureTag);        // sends {\"data\":{\"
 
-            // TODO (LPM): For each variable that gets its own graph, you'll need to 
+            //  For each variable that gets its own graph, you'll need to 
             // start with a \"GRAPH_NAME\":[{ prefix where GRAPH_NAME is the title of your graph
             // \"HALL0\":[{\"value\":xx.xx,\"epoch\":xxxxxxxxxx}]
-            // Figure out how to pull that variable name to use as the name of the graph? 
-
-        if (bufferFree() < 36) printTxBuffer(outClient);
-        snprintf(txBuffer + strlen(txBuffer),
-                 sizeof(txBuffer) - strlen(txBuffer), "%s",
-                 _baseLogger->getSamplingFeatureUUID());
-
-        if (bufferFree() < 42) printTxBuffer(outClient);
-        snprintf(txBuffer + strlen(txBuffer),
-                 sizeof(txBuffer) - strlen(txBuffer), "%s", timestampTag);
-        Logger::formatDateTime_ISO8601(Logger::markedLocalEpochTime)
-            .toCharArray(tempBuffer, 37);
-        snprintf(txBuffer + strlen(txBuffer),
-                 sizeof(txBuffer) - strlen(txBuffer), "%s", tempBuffer);
-        txBuffer[strlen(txBuffer)] = '"';
-        txBuffer[strlen(txBuffer)] = ',';
 
         for (uint8_t i = 0; i < _baseLogger->getArrayVarCount(); i++) {
             // Once the buffer fills, send it out
             if (bufferFree() < 47) printTxBuffer(outClient);
-
-            txBuffer[strlen(txBuffer)] = '"';
-            _baseLogger->getVarUUIDAtI(i).toCharArray(tempBuffer, 37);
+            // Grab the VarCode, convert to character array, stick in tempBuffer
+            _baseLogger->getVarCodeAtI(i).toCharArray(tempBuffer, 37);
+            // print tempBuffer - this becomes the GRAPH_NAME on IoTPlotter
             snprintf(txBuffer + strlen(txBuffer),
                      sizeof(txBuffer) - strlen(txBuffer), "%s", tempBuffer);
-            txBuffer[strlen(txBuffer)] = '"';
-            txBuffer[strlen(txBuffer)] = ':';
+            // Insert the text that comes before reporting a numeric value                     
+            snprintf(txBuffer + strlen(txBuffer),
+                 sizeof(txBuffer) - strlen(txBuffer), "%s", JSONvalueTag);
+            // Grab the numeric value for this variable, convert to a character array and stick in tempBuffer
             _baseLogger->getValueStringAtI(i).toCharArray(tempBuffer, 37);
+            // Print the variable value that's in tempBuffer now
             snprintf(txBuffer + strlen(txBuffer),
                      sizeof(txBuffer) - strlen(txBuffer), "%s", tempBuffer);
-            if (i + 1 != _baseLogger->getArrayVarCount()) {
+            // Insert the text that comes after a value and before reporting the epoch timestamp                     
+            snprintf(txBuffer + strlen(txBuffer),
+                 sizeof(txBuffer) - strlen(txBuffer), "%s", epochTag);
+            // Get the epoch timestamp and convert to character array to put into tempBuffer
+            itoa(Logger::markedLocalEpochTime, tempBuffer, 10);  // BASE 10
+            // Print the contents of tempBuffer (the epoch timestamp)
+            snprintf(txBuffer + strlen(txBuffer),
+                     sizeof(txBuffer) - strlen(txBuffer), "%s", tempBuffer);
+            if (i + 1 != _baseLogger->getArrayVarCount()) {     // Prep for another variable to be printed
+                txBuffer[strlen(txBuffer)] = '}';
+                txBuffer[strlen(txBuffer)] = ']';
                 txBuffer[strlen(txBuffer)] = ',';
-            } else {
+                txBuffer[strlen(txBuffer)] = '\"';      // to be followed by the next GRAPH_NAME (VarCode)
+            } else {        // finish off the JSON string
+                txBuffer[strlen(txBuffer)] = '}';
+                txBuffer[strlen(txBuffer)] = ']';
+                txBuffer[strlen(txBuffer)] = '}';
                 txBuffer[strlen(txBuffer)] = '}';
             }
         }
