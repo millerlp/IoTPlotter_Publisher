@@ -84,7 +84,7 @@ uint16_t IoTPlotterPublisher::calculateJsonSize() {
         jsonLength += _baseLogger->getValueStringAtI(i).length();  // The length of the reported numeric value
         jsonLength += 10;           // , "epoch":
         jsonLength += 10;          // markedLocalEpochTime or markedUTCEpochTime, should be 10 digits
-        jsonLength +=  3;           // }]      end of GRAPH_NAME segment
+        jsonLength +=  2;           // }]      end of GRAPH_NAME segment
 
         // Test if there are additional variables to report
         if (i + 1 != _baseLogger->getArrayVarCount()) {
