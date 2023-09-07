@@ -69,47 +69,54 @@ void IoTPlotterPublisher::setFeedID(const char* feedID) {
     _feedID = feedID;        // 
 }
 
-// TODO: Recalculate length for IoTPlotter feed instead
-// Calculates how long the JSON will be
+
+// Calculates how long the JSON string will be
 uint16_t IoTPlotterPublisher::calculateJsonSize() {
-    uint16_t jsonLength = 21;  // {"sampling_feature":"
-    jsonLength += 36;          // sampling feature UUID
-    jsonLength += 15;          // ","timestamp":"
-    jsonLength += 25;          // markedISO8601Time
-    jsonLength += 2;           //  ",
+    uint16_t jsonLength = 10;  // {"data":{"        start of the JSON string, to be followed by first graph name
+    // Cycle through all variables in the _internalArray holding the variable names
     for (uint8_t i = 0; i < _baseLogger->getArrayVarCount(); i++) {
-        jsonLength += 1;   //  "
-        jsonLength += 36;  // variable UUID
-        jsonLength += 2;   //  ":
-        jsonLength += _baseLogger->getValueStringAtI(i).length();
+        // Create GRAPH_NAME based on getVarCodeAtI
+        jsonLength +=
+            _baseLogger->getVarCodeAtI(i).length();  // VarCode length, used as GRAPH_NAME
+        
+        jsonLength += 12;           //  ":[{"value":   The stuff after GRAPH_NAME, before reporting a numeric value
+        jsonLength += _baseLogger->getValueStringAtI(i).length();  // The length of the reported numeric value
+        jsonLength += 10;           // , "epoch":
+        jsonLength += 10;          // markedLocalEpochTime or markedUTCEpochTime, should be 10 digits
+        jsonLength +=  3;           // }]      end of GRAPH_NAME segment
+
+        // Test if there are additional variables to report
         if (i + 1 != _baseLogger->getArrayVarCount()) {
-            jsonLength += 1;  // ,
+            jsonLength += 2;  // ,"     Start of next GRAPH_NAME iteration
         }
     }
-    jsonLength += 1;  // }
+    jsonLength += 2;  // }}   Close off the JSON string
 
     return jsonLength;
 }
 
-// TODO: Reformat for IoTPlotter
+
 // This prints a properly formatted JSON for IoTPlotter to an Arduino stream
 void IoTPlotterPublisher::printSensorDataJSON(Stream* stream) {
-    stream->print(samplingFeatureTag);
-    stream->print(_baseLogger->getSamplingFeatureUUID());
-    stream->print(timestampTag);
-    stream->print(Logger::formatDateTime_ISO8601(Logger::markedLocalEpochTime));
-    stream->print(F("\","));
-
+    stream->print("{\"data\":{\"");     // {"data":{"
     for (uint8_t i = 0; i < _baseLogger->getArrayVarCount(); i++) {
-        stream->print('"');
-        stream->print(_baseLogger->getVarUUIDAtI(i));
-        stream->print(F("\":"));
-        stream->print(_baseLogger->getValueStringAtI(i));
-        if (i + 1 != _baseLogger->getArrayVarCount()) { stream->print(','); }
+        stream->print(_baseLogger->getVarCodeAtI(i));  // VarCode, used as GRAPH_NAME
+        stream->print(":[{\"value\":");     // ":[{"value":
+        stream->print(_baseLogger->getValueStringAtI(i));       // print the actual value
+        stream->print(", \"epoch\":");      // , "epoch":
+        stream->print(Logger::markedLocalEpochTime); // print time  options: Logger::markedLocalEpochTime or Logger::markedUTCEpochTime 
+        stream->print("}]");
+
+        if (i + 1 != _baseLogger->getArrayVarCount()) { 
+            stream->print(",\"");       // start of the next iteration of GRAPH_NAME 
+        }
     }
 
-    stream->print('}');
+    stream->print("}}");            // close off the JSON string
 }
+
+
+
 
 // TODO: Reformat for IoTPlotter
 // This prints a fully structured post request for IoTPlotter to the
