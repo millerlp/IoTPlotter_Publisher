@@ -267,7 +267,7 @@ int16_t IoTPlotterPublisher::publishData(Client* outClient) {
                 txBuffer[strlen(txBuffer)] = '}';
                 txBuffer[strlen(txBuffer)] = ']';
                 txBuffer[strlen(txBuffer)] = ',';
-                txBuffer[strlen(txBuffer)] = '\"';      // to be followed by the next GRAPH_NAME (VarCode)
+                txBuffer[strlen(txBuffer)] = '"';      // was '\"', didn't work any better// to be followed by the next GRAPH_NAME (VarCode)
             } else {        // finish off the JSON string
                 txBuffer[strlen(txBuffer)] = '}';
                 txBuffer[strlen(txBuffer)] = ']';
